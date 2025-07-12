@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import TradingViewChart from '@/app/components/TradingViewChart';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const INTERVALS = {
   '1m': '1',
@@ -37,16 +38,13 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen p-8 flex flex-col justify-center items-center">
-      <div className="flex gap-2 mb-4">
+      <ToggleGroup type="single" value={interval} onValueChange={setInterval} className="mb-4">
         {Object.entries(INTERVALS).map(([label, value]) => (
-          <button
-            key={value}
-            onClick={() => setInterval(value)}
-            className={`px-4 py-2 rounded-md ${interval === value ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
+          <ToggleGroupItem key={value} value={value}>
             {label}
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
       <div className="w-full h-full">
         <TradingViewChart data={data} />
       </div>
