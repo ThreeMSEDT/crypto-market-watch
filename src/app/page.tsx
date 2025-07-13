@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import TradingViewChart from '@/app/components/TradingViewChart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -8,13 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 const INTERVALS = {
   '1m': '1',
@@ -47,7 +40,6 @@ export default function Home() {
   const [interval, setInterval] = useState('D');
   const [symbol, setSymbol] = useState('BTC');
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const commandInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getCandlesData(symbol, interval).then(setData);
@@ -57,6 +49,28 @@ export default function Home() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setPopoverOpen(true);
+      }
+
+      if (popoverOpen && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+        event.preventDefault();
+        const currentIndex = CRYPTOS.indexOf(symbol);
+        let newIndex;
+
+        if (event.key === 'ArrowUp') {
+          newIndex = currentIndex > 0 ? currentIndex - 1 : CRYPTOS.length - 1;
+        } else {
+          newIndex = currentIndex < CRYPTOS.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        setSymbol(CRYPTOS[newIndex]);
+      }
+
+      if (popoverOpen && event.key === 'Enter') {
+        setPopoverOpen(false);
+      }
+
+      if (popoverOpen && event.key === 'Escape') {
+        setPopoverOpen(false);
       }
     };
 
@@ -73,15 +87,7 @@ export default function Home() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
-
-  useEffect(() => {
-    if (popoverOpen) {
-      setTimeout(() => {
-        commandInputRef.current?.focus();
-      }, 100);
-    }
-  }, [popoverOpen]);
+  }, [popoverOpen, symbol]);
 
   return (
     <div className="h-screen w-screen p-8 flex flex-col justify-center items-center">
@@ -90,25 +96,20 @@ export default function Home() {
           <div />
         </PopoverTrigger>
         <PopoverContent className="w-80 mx-auto">
-          <Command>
-            <CommandInput ref={commandInputRef} placeholder="Search crypto..." />
-            <CommandEmpty>No crypto found.</CommandEmpty>
-            <CommandGroup>
-              {CRYPTOS.map((crypto) => (
-                <CommandItem
-                  key={crypto}
-                  onSelect={() => {
-                    setSymbol(crypto);
-                    setPopoverOpen(false);
-                  }}
-                >
-                  {crypto}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+          <RadioGroup value={symbol} onValueChange={(value) => {
+            setSymbol(value);
+            setPopoverOpen(false);
+          }} className="flex flex-col gap-2">
+            {CRYPTOS.map((crypto) => (
+              <div key={crypto} className="flex items-center space-x-2">
+                <RadioGroupItem value={crypto} id={crypto} />
+                <label htmlFor={crypto}>{crypto}</label>
+              </div>
+            ))}
+          </RadioGroup>
         </PopoverContent>
       </Popover>
+
       <ToggleGroup type="single" value={interval} onValueChange={setInterval} className="mb-4">
         {Object.entries(INTERVALS).map(([label, value]) => (
           <ToggleGroupItem key={value} value={value}>
@@ -116,6 +117,7 @@ export default function Home() {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
+
       <div className="w-full h-full">
         <TradingViewChart data={data} />
       </div>
