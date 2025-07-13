@@ -36,7 +36,7 @@ async function getCandlesData(symbol: string, interval: string) {
 
 export default function Home() {
   const [data, setData] = useState<any[]>([]);
-  const [interval, setInterval] = useState('D');
+  const [interval, setInterval] = useState('240');
   const [symbol, setSymbol] = useState('BTC');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [cryptos, setCryptos] = useState<string[]>([]);
@@ -52,50 +52,6 @@ export default function Home() {
       getCandlesData(symbol, interval).then(setData);
     }
   }, [interval, symbol, cryptos]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Shift') {
-        setPopoverOpen(true);
-      }
-
-      if (popoverOpen && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-        event.preventDefault();
-        const currentIndex = cryptos.indexOf(symbol);
-        let newIndex;
-
-        if (event.key === 'ArrowUp') {
-          newIndex = currentIndex > 0 ? currentIndex - 1 : cryptos.length - 1;
-        } else {
-          newIndex = currentIndex < cryptos.length - 1 ? currentIndex + 1 : 0;
-        }
-
-        setSymbol(cryptos[newIndex]);
-      }
-
-      if (popoverOpen && event.key === 'Enter') {
-        setPopoverOpen(false);
-      }
-
-      if (popoverOpen && event.key === 'Escape') {
-        setPopoverOpen(false);
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Shift') {
-        setPopoverOpen(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [popoverOpen, symbol]);
 
   return (
     <div className="h-screen w-screen p-8 flex flex-col justify-center items-center">
