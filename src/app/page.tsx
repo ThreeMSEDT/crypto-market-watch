@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TradingViewChart from '@/app/components/TradingViewChart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -31,7 +31,7 @@ async function getCandlesData(symbol: string, interval: string) {
 }
 
 export default function Home() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<[]>([]);
   const [interval, setInterval] = useState('240');
   const [symbol, setSymbol] = useState('BTC');
   const [popoverOpen, setPopoverOpen] = useState(false);
