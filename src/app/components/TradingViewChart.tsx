@@ -33,10 +33,10 @@ export default function TradingViewChart({ data }: TradingViewChartProps) {
       },
       grid: {
         vertLines: {
-          color: 'transparent',
+          color: 'rgba(100, 100, 100, 0.1)',
         },
         horzLines: {
-          color: 'transparent',
+          color: 'rgba(100, 100, 100, 0.1)',
         },
       },
       timeScale: {
