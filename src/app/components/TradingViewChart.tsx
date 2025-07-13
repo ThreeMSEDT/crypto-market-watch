@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createChart, IChartApi, ISeriesApi, ColorType, CandlestickSeries } from 'lightweight-charts'
 
 type CandleData = {
@@ -19,6 +19,7 @@ export default function TradingViewChart({ data }: TradingViewChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null)
+  const [hoveredCandleData, setHoveredCandleData] = React.useState<CandleData | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -64,6 +65,19 @@ export default function TradingViewChart({ data }: TradingViewChartProps) {
       wickUpColor: '#838ca1',
       priceLineVisible: false,
     });
+
+    chart.subscribeCrosshairMove(param => {
+      if (param.time) {
+        const dataPoint = param.seriesData.get(newSeries);
+        if (dataPoint) {
+          setHoveredCandleData(dataPoint as CandleData);
+        } else {
+          setHoveredCandleData(null);
+        }
+      } else {
+        setHoveredCandleData(null);
+      }
+    });
     candleSeriesRef.current = newSeries;
 
     const resizeObserver = new ResizeObserver(entries => {
@@ -91,11 +105,22 @@ export default function TradingViewChart({ data }: TradingViewChartProps) {
   }, [data]);
 
   return (
-    <div
-      ref={chartContainerRef}
-      className="h-full w-full"
-      style={{ minHeight: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-    >
+    <div className="relative h-full w-full">
+      <div
+        ref={chartContainerRef}
+        className="h-full w-full"
+        style={{ minHeight: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
+      </div>
+      {hoveredCandleData && (
+        <div className="absolute flex gap-4 top-2 left-2 p-2 rounded text-sm">
+          <div>Open: {hoveredCandleData.open}</div>
+          <div>High: {hoveredCandleData.high}</div>
+          <div>Low: {hoveredCandleData.low}</div>
+          <div>Close: {hoveredCandleData.close}</div>
+          <div>Change: {((hoveredCandleData.close - hoveredCandleData.open) / hoveredCandleData.open * 100).toFixed(2)}%</div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
