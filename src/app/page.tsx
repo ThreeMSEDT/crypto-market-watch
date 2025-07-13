@@ -99,33 +99,35 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen p-8 flex flex-col justify-center items-center">
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <div />
-        </PopoverTrigger>
-        <PopoverContent className="w-80 mx-auto max-h-60 overflow-y-auto">
-          <RadioGroup value={symbol} onValueChange={(value) => {
-            setSymbol(value);
-            setPopoverOpen(false);
-          }} className="flex flex-col gap-2">
-            {cryptos.map((crypto) => (
-              <div key={crypto} className="flex items-center space-x-2">
-                <RadioGroupItem value={crypto} id={crypto} />
-                <label htmlFor={crypto}>{crypto}</label>
-              </div>
-            ))}
-          </RadioGroup>
-        </PopoverContent>
-      </Popover>
-
-      <ToggleGroup type="single" value={interval} onValueChange={setInterval} className="mb-4">
-        {Object.entries(INTERVALS).map(([label, value]) => (
-          <ToggleGroupItem key={value} value={value}>
-            {label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-
+      <div className="flex gap-24 items-center mb-4">
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <div className="font-bold cursor-pointer">
+              {symbol}
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 mx-auto max-h-60 overflow-y-auto">
+            <RadioGroup value={symbol} onValueChange={(value) => {
+              setSymbol(value);
+              setPopoverOpen(false);
+            }} className="flex flex-col gap-2">
+              {cryptos.map((crypto) => (
+                <div key={crypto} className="flex items-center space-x-2">
+                  <RadioGroupItem value={crypto} id={crypto} />
+                  <label htmlFor={crypto}>{crypto}</label>
+                </div>
+              ))}
+            </RadioGroup>
+          </PopoverContent>
+        </Popover>
+        <ToggleGroup type="single" value={interval} onValueChange={setInterval}>
+          {Object.entries(INTERVALS).map(([label, value]) => (
+            <ToggleGroupItem key={value} value={value}>
+              {label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
       <div className="w-full h-full">
         <TradingViewChart data={data} />
       </div>
