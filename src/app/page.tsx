@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import TradingViewChart from '@/app/components/TradingViewChart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -20,8 +21,6 @@ const INTERVALS = {
   '1M': 'M',
 };
 
-const CRYPTOS = ['BTC', 'ETH', 'SOL'];
-
 async function getCandlesData(symbol: string, interval: string) {
   const response = await fetch(`https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}USDT&interval=${interval}`, { next: { revalidate: 60 } });
   const { result } = await response.json();
@@ -40,10 +39,19 @@ export default function Home() {
   const [interval, setInterval] = useState('D');
   const [symbol, setSymbol] = useState('BTC');
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [cryptos, setCryptos] = useState<string[]>([]);
 
   useEffect(() => {
-    getCandlesData(symbol, interval).then(setData);
-  }, [interval, symbol]);
+    fetch('/cryptos.json')
+      .then(response => response.json())
+      .then(data => setCryptos(data));
+  }, []);
+
+  useEffect(() => {
+    if (cryptos.length > 0) {
+      getCandlesData(symbol, interval).then(setData);
+    }
+  }, [interval, symbol, cryptos]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,16 +61,16 @@ export default function Home() {
 
       if (popoverOpen && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
         event.preventDefault();
-        const currentIndex = CRYPTOS.indexOf(symbol);
+        const currentIndex = cryptos.indexOf(symbol);
         let newIndex;
 
         if (event.key === 'ArrowUp') {
-          newIndex = currentIndex > 0 ? currentIndex - 1 : CRYPTOS.length - 1;
+          newIndex = currentIndex > 0 ? currentIndex - 1 : cryptos.length - 1;
         } else {
-          newIndex = currentIndex < CRYPTOS.length - 1 ? currentIndex + 1 : 0;
+          newIndex = currentIndex < cryptos.length - 1 ? currentIndex + 1 : 0;
         }
 
-        setSymbol(CRYPTOS[newIndex]);
+        setSymbol(cryptos[newIndex]);
       }
 
       if (popoverOpen && event.key === 'Enter') {
@@ -95,12 +103,12 @@ export default function Home() {
         <PopoverTrigger asChild>
           <div />
         </PopoverTrigger>
-        <PopoverContent className="w-80 mx-auto">
+        <PopoverContent className="w-80 mx-auto max-h-60 overflow-y-auto">
           <RadioGroup value={symbol} onValueChange={(value) => {
             setSymbol(value);
             setPopoverOpen(false);
           }} className="flex flex-col gap-2">
-            {CRYPTOS.map((crypto) => (
+            {cryptos.map((crypto) => (
               <div key={crypto} className="flex items-center space-x-2">
                 <RadioGroupItem value={crypto} id={crypto} />
                 <label htmlFor={crypto}>{crypto}</label>
