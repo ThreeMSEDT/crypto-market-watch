@@ -3,12 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import TradingViewChart from '@/app/components/TradingViewChart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const INTERVALS = {
   '1m': '1',
@@ -53,22 +49,46 @@ export default function Home() {
     }
   }, [interval, symbol, cryptos]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault();
+        if (cryptos.length === 0) return;
+        const currentIndex = cryptos.indexOf(symbol);
+        if (currentIndex !== -1) {
+          const nextIndex = e.key === 'ArrowUp'
+            ? (currentIndex - 1 + cryptos.length) % cryptos.length
+            : (currentIndex + 1) % cryptos.length;
+          setSymbol(cryptos[nextIndex]);
+        } else {
+          setSymbol(cryptos[0]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cryptos, symbol]);
+
   return (
-    <div className="h-screen w-screen p-8 flex flex-col justify-center items-center">
-      <div className="flex gap-24 items-center mb-4">
+    <div className='h-screen w-screen p-8 flex flex-col justify-center items-center'>
+      <div className='flex gap-24 items-center mb-4'>
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
-            <div className="font-bold cursor-pointer">
+            <div className='font-bold cursor-pointer'>
               {symbol}
             </div>
           </PopoverTrigger>
-          <PopoverContent className="w-80 mx-auto max-h-60 overflow-y-auto">
+          <PopoverContent className='w-80 mx-auto max-h-60 overflow-y-auto'>
             <RadioGroup value={symbol} onValueChange={(value) => {
               setSymbol(value);
               setPopoverOpen(false);
-            }} className="flex flex-col gap-2">
+            }} className='flex flex-col gap-2'>
               {cryptos.map((crypto) => (
-                <div key={crypto} className="flex items-center space-x-2">
+                <div key={crypto} className='flex items-center space-x-2'>
                   <RadioGroupItem value={crypto} id={crypto} />
                   <label htmlFor={crypto}>{crypto}</label>
                 </div>
@@ -76,7 +96,7 @@ export default function Home() {
             </RadioGroup>
           </PopoverContent>
         </Popover>
-        <ToggleGroup type="single" value={interval} onValueChange={setInterval}>
+        <ToggleGroup type='single' value={interval} onValueChange={setInterval}>
           {Object.entries(INTERVALS).map(([label, value]) => (
             <ToggleGroupItem key={value} value={value}>
               {label}
@@ -84,7 +104,7 @@ export default function Home() {
           ))}
         </ToggleGroup>
       </div>
-      <div className="w-full h-full">
+      <div className='w-full h-full'>
         <TradingViewChart data={data} />
       </div>
     </div>
